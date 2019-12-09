@@ -18,7 +18,6 @@ def enter_lock(file):
         try:
             flock(file, LOCK_EX | LOCK_NB)
         except BlockingIOError as e:
-            print('THE FILE IS LOCKED')
             sleep(0.005)
         else:
             return
@@ -40,7 +39,6 @@ def main():
         print(help_text)
         return
 
-    print('started')
     # статус выполнения алгоритма
     running = True
     # маркер первой итерации
@@ -107,8 +105,6 @@ def main():
         '''
         domain_list = [line.strip()
                        for line in file_data[pointer:pointer + LINKS_PER_ITERATION_NUMBER]]
-        # временно
-        print(domain_list)
 
         '''
         Собираем ответ, добавляем строки одна за одной, в формате, данном в
@@ -124,9 +120,6 @@ def main():
             except Exception:
                 output += domain + '\t\t\t\t[' + 'unknown' + ']\n'
                 pass
-
-        # временно
-        sleep(3)
 
         # открываем файл результата
         result_file = open(RESULTS_FILE_PATH, 'a')
