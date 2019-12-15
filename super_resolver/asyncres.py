@@ -42,37 +42,33 @@ def main():
     # статус выполнения алгоритма
     running = True
     # маркер первой итерации
-    is_first_iteration = True
-
     while running:
-        try:
-            # открываем файл
-            pointer_file = open(POSITION_FILE_PATH, 'r')
-            '''
-            блокируем файл для других процессов для того, что бы не попасть в
-            ситуацию, когда после того, как мы считаем значение указателя, другой
-            процесс не записал туда новое значение, тем самым нарушив работу программы
-            '''
-            enter_lock(pointer_file)
-            # патаемся считать значение из файла pointer
-            file_data = pointer_file.readlines()[0].strip()
-            # присваеваем перменной значение из файла pointer
-            pointer = int(file_data)
-            # записываем новое значение в файл pointer
-            open(POSITION_FILE_PATH, 'w').write(
-                str(pointer + LINKS_PER_ITERATION_NUMBER))
-            # снимаем lock с файла
-            exit_lock(pointer_file)
-            # закрываем файл
-            pointer_file.close()
 
-        except (IndexError, FileNotFoundError):
-            '''
-            Может произойти две ошибки - IndexError, в случае, если файл pointer
-            пуст, или - FileNotFoundError, в случае, когда файла не существует,
-            в таких ситуациях указатель будет равен нулю
-            '''
-            pointer = 0
+        pointer_file = open(POSITION_FILE_PATH, 'r')
+
+        '''
+        блокируем файл для других процессов для того, что бы не попасть в
+        ситуацию, когда после того, как мы считаем значение указателя, другой
+        процесс не записал туда новое значение, тем самым нарушив работу программы
+        '''
+        enter_lock(pointer_file)
+        # патаемся считать значение из файла pointer
+        file_data = pointer_file.readlines()[0].strip()
+        # присваеваем перменной значение из файла pointer
+        if file_data == 'END':
+            return
+
+        pointer = int(file_data)
+
+        # записываем новое значение в файл pointer
+        open(POSITION_FILE_PATH, 'w').write(
+            str(pointer + LINKS_PER_ITERATION_NUMBER))
+            
+        # снимаем lock с файла
+        exit_lock(pointer_file)
+        # закрываем файл
+        pointer_file.close()
+
 
         '''
         Условие, которое предотвращает ситуацию, когда один процесс завершился и
@@ -82,11 +78,10 @@ def main():
         работы программы. Если итерация первая (is_first_iteration=True), тогда
         программа начинает работу со строки с индексом 0.
         '''
-        if pointer == 0 and not is_first_iteration:
+        print(pointer)
+        if pointer == 'END':
             return
 
-        # полсле первого исполнения цикла, присваеваем маркеру значение False
-        is_first_iteration = False
 
         # открываем файл, который содержит домены
         file_data = open(DOMAINS_FILE_PATH, 'r').readlines()
@@ -96,7 +91,7 @@ def main():
         объявляется полседней и работа программы должна завершиться.
         '''
         if len(file_data) <= pointer + LINKS_PER_ITERATION_NUMBER:
-            open(POSITION_FILE_PATH, 'w').write('0')
+            open(POSITION_FILE_PATH, 'w').write('END')
             running = False
         '''
         Cобираем нужные нам данные в промежутке от значения pointer, до
