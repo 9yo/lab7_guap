@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from fcntl import flock, LOCK_EX, LOCK_NB, LOCK_UN
-from time import sleep
+from time import sleep, time
 from socket import gethostbyname
 from sys import argv
+import timeit
 
 DOMAINS_FILE_PATH = 'domains'  # путь до файла с доменами
 RESULTS_FILE_PATH = 'results'  # путь до файла с резульатом
@@ -43,8 +44,12 @@ def main():
     running = True
     # маркер первой итерации
     while running:
-
-        pointer_file = open(POSITION_FILE_PATH, 'r')
+        try:
+            pointer_file = open(POSITION_FILE_PATH, 'r')
+        except FileNotFoundError:
+            pointer_file = open(POSITION_FILE_PATH, 'w')
+            pointer_file.close()
+            pointer_file = open(POSITION_FILE_PATH, 'r')
 
         '''
         блокируем файл для других процессов для того, что бы не попасть в
@@ -53,7 +58,10 @@ def main():
         '''
         enter_lock(pointer_file)
         # патаемся считать значение из файла pointer
-        file_data = pointer_file.readlines()[0].strip()
+        try:
+            file_data = pointer_file.readlines()[0].strip()
+        except IndexError:
+            file_data = 0
         # присваеваем перменной значение из файла pointer
         if file_data == 'END':
             return
@@ -128,4 +136,6 @@ def main():
 
 
 if __name__ == '__main__':
+    start_time = timeit.default_timer()
     main()
+    print(timeit.default_timer() - start_time)
