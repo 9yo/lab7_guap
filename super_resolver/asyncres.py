@@ -63,7 +63,7 @@ def main():
         # записываем новое значение в файл pointer
         open(POSITION_FILE_PATH, 'w').write(
             str(pointer + LINKS_PER_ITERATION_NUMBER))
-            
+
         # снимаем lock с файла
         exit_lock(pointer_file)
         # закрываем файл
@@ -78,7 +78,6 @@ def main():
         работы программы. Если итерация первая (is_first_iteration=True), тогда
         программа начинает работу со строки с индексом 0.
         '''
-        print(pointer)
         if pointer == 'END':
             return
 
